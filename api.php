@@ -48,6 +48,7 @@ switch ($method) {
         break;
     case 'POST':
         if ($entity == "LandmarksOrHistoricalBuildings" or $entity == "Places") {
+            $dir = "./$entity/";
             $a = scandir($dir, 1);
             //First element
             $last_file = reset($array);
