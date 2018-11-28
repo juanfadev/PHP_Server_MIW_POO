@@ -18,19 +18,46 @@ $input = json_decode(file_get_contents('php://input'), true);
 $entity = preg_replace('/[^a-z0-9_]+/i', '', array_shift($request));
 $key = array_shift($request);
 
+
+function returnJson($data_proccesed)
+{
+    header('Content-Type: application/json');
+    echo $data_proccesed;
+}
+
 switch ($method) {
     case 'GET':
-        if ($entity == "LandmarksOrHistoricalBuildings" or $entity == "Places") {
-            if (is_numeric($key)){
-                $data_proccesed = file_get_contents('./' . $entity . '/' . $key . '.json');
-            }
-            else {
+        if ($entity == "LandmarksOrHistoricalBuildings") {
+            if (is_numeric($key)) {
+                $landmark = new Landmark();
+                $landmark->readFromFile($key);
+                $data_proccesed = $landmark->toJSON();
+            } else {
                 $array_data = array();
                 $dir = "./$entity/";
                 $a = array_slice(scandir($dir), 2);
                 foreach ($a as &$item) {
+                    $landmark = new Landmark();
                     $string = file_get_contents("./" . $entity . "/" . $item);
-                    $array_data[] = json_decode($string, true);
+                    $landmark->set(json_decode($string, true));
+                    $array_data[] = $landmark;
+                }
+                $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
+            }
+        } elseif ($entity == "Places") {
+            if (is_numeric($key)) {
+                $place = new Place();
+                $place->readFromFile($key);
+                $data_proccesed = $place->toJSON();
+            } else {
+                $array_data = array();
+                $dir = "./$entity/";
+                $a = array_slice(scandir($dir), 2);
+                foreach ($a as &$item) {
+                    $place = new Place();
+                    $string = file_get_contents("./" . $entity . "/" . $item);
+                    $place->set(json_decode($string, true));
+                    $array_data[] = $place;
                 }
                 $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
             }
@@ -40,38 +67,131 @@ switch ($method) {
         returnJson($data_proccesed);
         break;
     case 'PUT':
-        if ($entity == "LandmarksOrHistoricalBuildings" or $entity == "Places") {
+        if ($entity == "LandmarksOrHistoricalBuildings") {
             if (is_numeric($key)) {
-                file_put_contents('./' . $entity . '/' . $key . '.json', json_encode($input, JSON_FORCE_OBJECT));
-                $data_proccesed = file_get_contents('./' . $entity . '/' . $key . '.json');
-                returnJson($data_proccesed);
+                $landmark = new Landmark();
+                $landmark->set($input);
+                $landmark->writeToFile($key);
+                returnJson($landmark->toJSON());
+            }
+        } elseif ($entity == "Places") {
+            if (is_numeric($key)) {
+                $place = new Place();
+                $place->set($input);
+                $place->writeToFile($key);
+                returnJson($place->toJSON());
             }
         }
         break;
     case 'POST':
-        if ($entity == "LandmarksOrHistoricalBuildings" or $entity == "Places") {
+        if ($entity == "LandmarksOrHistoricalBuildings") {
             $dir = "./$entity/";
-            $a = scandir($dir, 1);
+            $array = scandir($dir, 1);
             //First element
             $last_file = reset($array);
             $key = intval($last_file) + 1;
-            file_put_contents('./' . $entity . '/' . $key . '.json', json_encode($input, JSON_FORCE_OBJECT));
-            $data_proccesed = file_get_contents('./' . $entity . '/' . $key . '.json');
+            $landmark = new Landmark();
+            $landmark->set($input);
+            $landmark->writeToFile($key);
+            $data_proccesed = $landmark->toJSON();
+            returnJson($data_proccesed);
+        } elseif ($entity == "Places") {
+            $dir = "./$entity/";
+            $array = scandir($dir, 1);
+            //First element
+            $last_file = reset($array);
+            $key = intval($last_file) + 1;
+            $place = new Place();
+            $place->set($input);
+            $place->writeToFile($key);
+            $data_proccesed = $place->toJSON();
+            returnJson($data_proccesed);
         }
-        returnJson($data_proccesed);
         break;
     case 'DELETE':
-        if ($entity == "LandmarksOrHistoricalBuildings" or $entity == "Places") {
+        if ($entity == "LandmarksOrHistoricalBuildings") {
             if (is_numeric($key)) {
-                $data_proccesed = file_get_contents('./' . $entity . '/' . $key . '.json');
-                unlink('./' . $entity . '/' . $key . '.json');
-                returnJson($data_proccesed);
+                $landmark = new Landmark();
+                $landmark->deleteFile($key);
+                returnJson($landmark->toJSON());
+            }
+        } elseif ($entity == "Places") {
+            if (is_numeric($key)) {
+                $place = new Place();
+                $place->deleteFile($key);
+                returnJson($place->toJSON());
             }
         }
         break;
 }
 
-function returnJson($data_proccesed){
-    header('Content-Type: application/json');
-    echo $data_proccesed;
+
+class Landmark
+{
+
+    public function set($json)
+    {
+        foreach ($json AS $key => $value) $this->{$key} = $value;
+    }
+
+    public function isValid()
+    {
+        return $this->{'@type'} == "LandmarksOrHistoricalBuildings" and $this->{'@context'} == "http://schema.org/";
+    }
+
+    public function readFromFile($id)
+    {
+        $this->set(json_decode(file_get_contents('./LandmarksOrHistoricalBuildings/' . $id . '.json'), true));
+    }
+
+    public function writeToFile($id)
+    {
+        file_put_contents('./LandmarksOrHistoricalBuildings/' . $id . '.json', $this->toJSON());
+    }
+
+    public function deleteFile($id)
+    {
+        $this->readFromFile($id);
+        unlink('./LandmarksOrHistoricalBuildings/' . $id . '.json');
+    }
+
+    public function toJSON()
+    {
+        return json_encode($this, JSON_PRETTY_PRINT);
+    }
+}
+
+class Place
+{
+
+    public function set($json)
+    {
+        foreach ($json AS $key => $value) $this->{$key} = $value;
+    }
+
+    public function isValid()
+    {
+        return $this->{'@type'} == "Place" and $this->{'@context'} == "http://schema.org/";
+    }
+
+    public function readFromFile($id)
+    {
+        $this->set(json_decode(file_get_contents('./Places/' . $id . '.json'), true));
+    }
+
+    public function writeToFile($id)
+    {
+        file_put_contents('./Places/' . $id . '.json', $this->toJSON());
+    }
+
+    public function deleteFile($id)
+    {
+        $this->readFromFile($id);
+        unlink('./Places/' . $id . '.json');
+    }
+
+    public function toJSON()
+    {
+        return json_encode($this, JSON_PRETTY_PRINT);
+    }
 }
