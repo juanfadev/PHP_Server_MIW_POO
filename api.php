@@ -19,10 +19,20 @@ $entity = preg_replace('/[^a-z0-9_]+/i', '', array_shift($request));
 $key = array_shift($request);
 
 
-function returnJson($data_proccesed)
+function returnResponse($data_proccesed)
 {
-    header('Content-Type: application/json');
-    echo $data_proccesed;
+    $format = $_SERVER['HTTP_ACCEPT'] or 'html';
+    switch ($format) {
+        case 'application/json':
+            header('Content-Type: application/json');
+            echo $data_proccesed->toJSON();
+            break;
+        default:
+            header('Content-type: text/html');
+            echo $data_proccesed->toHTML();
+            break;
+
+    }
 }
 
 switch ($method) {
@@ -31,7 +41,7 @@ switch ($method) {
             if (is_numeric($key)) {
                 $landmark = new Landmark();
                 $landmark->readFromFile($key);
-                $data_proccesed = $landmark->toJSON();
+                $data_proccesed = $landmark;
             } else {
                 $array_data = array();
                 $dir = "./$entity/";
@@ -48,7 +58,7 @@ switch ($method) {
             if (is_numeric($key)) {
                 $place = new Place();
                 $place->readFromFile($key);
-                $data_proccesed = $place->toJSON();
+                $data_proccesed = $place;
             } else {
                 $array_data = array();
                 $dir = "./$entity/";
@@ -64,7 +74,7 @@ switch ($method) {
         } else {
             $data_proccesed = file_get_contents("./entities/entities.json");
         }
-        returnJson($data_proccesed);
+        returnResponse($data_proccesed);
         break;
     case 'PUT':
         if ($entity == "LandmarksOrHistoricalBuildings") {
@@ -72,14 +82,14 @@ switch ($method) {
                 $landmark = new Landmark();
                 $landmark->set($input);
                 $landmark->writeToFile($key);
-                returnJson($landmark->toJSON());
+                returnResponse($landmark);
             }
         } elseif ($entity == "Places") {
             if (is_numeric($key)) {
                 $place = new Place();
                 $place->set($input);
                 $place->writeToFile($key);
-                returnJson($place->toJSON());
+                returnResponse($place);
             }
         }
         break;
@@ -93,8 +103,7 @@ switch ($method) {
             $landmark = new Landmark();
             $landmark->set($input);
             $landmark->writeToFile($key);
-            $data_proccesed = $landmark->toJSON();
-            returnJson($data_proccesed);
+            returnResponse($landmark);
         } elseif ($entity == "Places") {
             $dir = "./$entity/";
             $array = scandir($dir, 1);
@@ -104,8 +113,7 @@ switch ($method) {
             $place = new Place();
             $place->set($input);
             $place->writeToFile($key);
-            $data_proccesed = $place->toJSON();
-            returnJson($data_proccesed);
+            returnResponse($place);
         }
         break;
     case 'DELETE':
@@ -113,13 +121,13 @@ switch ($method) {
             if (is_numeric($key)) {
                 $landmark = new Landmark();
                 $landmark->deleteFile($key);
-                returnJson($landmark->toJSON());
+                returnResponse($landmark);
             }
         } elseif ($entity == "Places") {
             if (is_numeric($key)) {
                 $place = new Place();
                 $place->deleteFile($key);
-                returnJson($place->toJSON());
+                returnResponse($place);
             }
         }
         break;
@@ -158,6 +166,41 @@ class Landmark
     public function toJSON()
     {
         return json_encode($this, JSON_PRETTY_PRINT);
+    }
+
+    public function toHTML()
+    {
+        return "<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset=\"utf-8\" />
+                <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
+                <title>Landmark" . $this->name . "</title>
+                <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+                <script type=\"application/ld+json\">
+                    ".$this->toJSON()."
+                </script>
+            </head>
+            <body>
+                <h1>Landmark:" . $this->name . " </h1 >
+                <h2 > Description: </h2 >
+                    <p >" . $this->description . "</p>
+                <h2 > Address: </h2 >
+                <ul >
+                    <li >
+                    Locality: " . $this->address['addressLocality'] . "
+                    </li >
+                                    <li >
+                    Region: " . $this->address['addressRegion'] . "
+                    </li >
+                                    <li >
+                    Country: " . $this->address['addressCountry'] . "
+                    </li >
+                </ul >
+                <img src = \"" . $this->photo . "\" alt=\"" . $this->name . "photo\" />
+                <a href=\"" . $this->mainEntityOfPage . "\">Main URL</a>
+            </body>
+            </html>";
     }
 }
 
