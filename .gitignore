@@ -11,7 +11,6 @@
 /build/*.phar.asc
 /build/binary-phar-autoload.php
 /cache.properties
-/composer.lock
 /tests/end-to-end/*.diff
 /tests/end-to-end/*.exp
 /tests/end-to-end/*.log
