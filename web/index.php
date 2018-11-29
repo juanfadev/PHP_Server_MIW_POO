@@ -35,6 +35,13 @@ function returnResponse($data_proccesed)
     }
 }
 
+function returnArrayResponse($data_proccesed)
+{
+    header('Content-Type: application/json');
+    echo $data_proccesed;
+
+}
+
 switch ($method) {
     case 'GET':
         if ($entity == "LandmarksOrHistoricalBuildings") {
@@ -54,6 +61,7 @@ switch ($method) {
                 }
                 $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
             }
+            returnArrayResponse($data_proccesed);
         } elseif ($entity == "Places") {
             if (is_numeric($key)) {
                 $place = new Place();
@@ -71,10 +79,11 @@ switch ($method) {
                 }
                 $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
             }
+            returnResponse($data_proccesed);
         } else {
             $data_proccesed = file_get_contents("./entities/entities.json");
+            returnArrayResponse($data_proccesed);
         }
-        returnResponse($data_proccesed);
         break;
     case 'PUT':
         if ($entity == "LandmarksOrHistoricalBuildings") {
@@ -178,7 +187,7 @@ class Landmark
                 <title>Landmark" . $this->name . "</title>
                 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
                 <script type=\"application/ld+json\">
-                    ".$this->toJSON()."
+                    " . $this->toJSON() . "
                 </script>
             </head>
             <body>
