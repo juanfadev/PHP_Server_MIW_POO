@@ -63,7 +63,6 @@ switch ($method) {
                 $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
                 returnArrayResponse($data_proccesed);
             }
-            returnResponse($data_proccesed);
         } elseif ($entity == "Places") {
             if (is_numeric($key)) {
                 $place = new Place();
@@ -144,6 +143,8 @@ switch ($method) {
             }
         }
         break;
+    case 'OPTIONS':
+        echo '';
 }
 
 
