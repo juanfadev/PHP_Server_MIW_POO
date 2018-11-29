@@ -49,6 +49,7 @@ switch ($method) {
                 $landmark = new Landmark();
                 $landmark->readFromFile($key);
                 $data_proccesed = $landmark;
+                returnResponse($data_proccesed);
             } else {
                 $array_data = array();
                 $dir = "./$entity/";
@@ -60,13 +61,15 @@ switch ($method) {
                     $array_data[] = $landmark;
                 }
                 $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
+                returnArrayResponse($data_proccesed);
             }
-            returnArrayResponse($data_proccesed);
+            returnResponse($data_proccesed);
         } elseif ($entity == "Places") {
             if (is_numeric($key)) {
                 $place = new Place();
                 $place->readFromFile($key);
                 $data_proccesed = $place;
+                returnResponse($data_proccesed);
             } else {
                 $array_data = array();
                 $dir = "./$entity/";
@@ -78,8 +81,9 @@ switch ($method) {
                     $array_data[] = $place;
                 }
                 $data_proccesed = json_encode($array_data, JSON_PRETTY_PRINT);
+                returnArrayResponse($data_proccesed);
             }
-            returnResponse($data_proccesed);
+
         } else {
             $data_proccesed = file_get_contents("./entities/entities.json");
             returnArrayResponse($data_proccesed);
@@ -245,5 +249,40 @@ class Place
     public function toJSON()
     {
         return json_encode($this, JSON_PRETTY_PRINT);
+    }
+
+    public function toHTML()
+    {
+        return "<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset=\"utf-8\" />
+                <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
+                <title>Landmark" . $this->name . "</title>
+                <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+                <script type=\"application/ld+json\">
+                    " . $this->toJSON() . "
+                </script>
+            </head>
+            <body>
+                <h1>Landmark:" . $this->name . " </h1 >
+                <h2 > Description: </h2 >
+                    <p >" . $this->description . "</p>
+                <h2 > Address: </h2 >
+                <ul >
+                    <li >
+                    Locality: " . $this->address['addressLocality'] . "
+                    </li >
+                                    <li >
+                    Region: " . $this->address['addressRegion'] . "
+                    </li >
+                                    <li >
+                    Country: " . $this->address['addressCountry'] . "
+                    </li >
+                </ul >
+                <img src = \"" . $this->photo . "\" alt=\"" . $this->name . "photo\" />
+                <a href=\"" . $this->mainEntityOfPage . "\">Main URL</a>
+            </body>
+            </html>";
     }
 }
