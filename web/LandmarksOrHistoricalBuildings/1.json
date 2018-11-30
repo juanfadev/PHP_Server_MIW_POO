@@ -1,0 +1,15 @@
+{
+  "@context": "http://schema.org/",
+  "@type": "LandmarksOrHistoricalBuildings",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "España",
+    "addressLocality": "Gijón",
+    "addressRegion": "Asturias"
+  },
+  "streetAddress": "Calle Trinidad, 17, 33201 Gijón, Asturias",
+  "photo": "https://upload.wikimedia.org/wikipedia/commons/6/64/Palacio_de_Jove_Huergo_y_Capilla_de_la_Trinidad.jpg",
+  "description": "El complejo de la Trinidad, formado por el palacio de los Jove Huergo y la capilla anexa sitos en el municipio de Gijón (Asturias, España), fue construido en el siglo XVII.    El palacio lo constituyen dos edificios yuxtapuestos de planta rectangular divididos en tres plantas. En ambos cuerpos hay una simétrica distribución de huecos y los pisos se separan por una línea de impostas. Un escudo con las armas de Hevia, Miranda y Lavandera, situado en el eje central del edificio es el único elemento decorativo de la fachada. Adosada al palacio está la capilla, de planta de nave única, dividida en dos tramos. La fachada soporta una monumental portada barroca, estructurada por un hueco adintelado recorrido por pilastras molduradas. Sobre el dintel, un panel alberga el escudo de los Jove y se corona por un frontón semicircular con luneto que ilumina el coro.",
+  "mainEntityOfPage": "https://es.wikipedia.org/wiki/Palacio_de_los_Jove_Huergo",
+  "name": "Palacio de los Jove Huergo"
+}
